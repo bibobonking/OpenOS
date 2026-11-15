@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+/* The DE sets these from /system/de.json; these are the fallbacks. */
+:root {
+  --os-bg: #0b0d12;
+  --os-surface: #141821;
+  --os-surface-2: #1c212c;
+  --os-text: #e6e9f0;
+  --os-muted: #8b93a7;
+  --os-accent: #6aa9ff;
+  --os-danger: #ff6b6b;
+  --os-radius: 12px;
+  --os-font: ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: var(--os-bg);
+  color: var(--os-text);
+  font-family: var(--os-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--os-accent);
+  outline-offset: 2px;
+}
