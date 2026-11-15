@@ -1,6 +1,6 @@
 // The first-boot disk image. Everything here is editable at runtime — this is
-// just what a fresh install contains. Delete it (or `rm -rf` the tree) and the
-// OS still boots, because the kernel falls back to src/kernel/defaults.ts.
+// just what a fresh install contains. It is only used when there is no saved
+// image yet, or after kernel.reset().
 
 import { dir, mkdirp, writeFile } from './vfs.ts'
 import type { DirNode } from './types.ts'

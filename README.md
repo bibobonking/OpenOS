@@ -14,6 +14,11 @@ bun run typecheck  # tsc --noEmit
 bun run test       # node --test (kernel + app frame)
 ```
 
+## Docs
+
+- [HOW-TO.md](HOW-TO.md) — hướng dẫn tùy biến bằng source, và những chỗ hụt thật
+  của template (đọc trước khi tin tưởng nó).
+
 ## Map
 
 ```
