@@ -1,4 +1,4 @@
-// Turns an .html file in the VFS into a self-contained document: its local
+// Turn an .html file in the VFS into a self-contained document: its local
 // .css and .js are inlined, and a tiny `openos` bridge is injected so the app
 // can talk to the kernel over postMessage. The frame runs in an opaque origin
 // (sandbox, no allow-same-origin), so it cannot touch the desktop DOM.

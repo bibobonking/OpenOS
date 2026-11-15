@@ -1,47 +1,15 @@
-// The kernel: process table, filesystem, DE config, persistence.
+// The kernel: process table, filesystem, persistence, event bus.
 // It owns all mutable state and is the only place that talks to storage.
-// Everything else (DE, apps) reads through here and reacts to events.
+// It has no opinion about looks: no theme, no config file, no plugin hooks.
+// Everything visual lives in the desktop below it or in an app.
 
 import * as fs from './vfs.ts'
 import type { DirNode, KernelEventMap, Process } from './types.ts'
 import { seedTree } from './seed.ts'
 
 const STORAGE_KEY = 'openos.v1'
-const DE_PATH = '/system/de.json'
 
 type Listener<E extends keyof KernelEventMap> = (payload: KernelEventMap[E]) => void
-
-export interface DeConfig {
-  /** Which source DE to mount. See src/de/registry.ts */
-  shell: string
-  /** Any CSS custom properties; the DE decides how to use them. */
-  theme: Record<string, string>
-  /** Wallpaper: css `background` value, or `url(...)`. */
-  wallpaper: string
-  /** Dock/taskbar placement, DE-specific but this is the convention. */
-  dock: 'left' | 'bottom' | 'right' | 'top' | 'none'
-  /** Window chrome: rounded corners + backdrop blur, DE-specific. */
-  window: { radius: number; blur: boolean; border: boolean }
-}
-
-export const defaultDe: DeConfig = {
-  shell: 'classic',
-  theme: {
-    '--os-bg': '#0b0d12',
-    '--os-surface': '#141821',
-    '--os-surface-2': '#1c212c',
-    '--os-text': '#e6e9f0',
-    '--os-muted': '#8b93a7',
-    '--os-accent': '#6aa9ff',
-    '--os-danger': '#ff6b6b',
-    '--os-radius': '12px',
-    '--os-font': 'ui-sans-serif, system-ui, sans-serif',
-  },
-  wallpaper:
-    'radial-gradient(1200px 800px at 20% 10%, #1b2740 0%, transparent 60%), radial-gradient(900px 700px at 85% 90%, #2a1b3d 0%, transparent 55%), #0b0d12',
-  dock: 'left',
-  window: { radius: 12, blur: true, border: true },
-}
 
 export interface SpawnOptions {
   title?: string
@@ -55,18 +23,16 @@ export interface SpawnOptions {
 class Kernel {
   root: DirNode = seedTree()
   processes: Process[] = []
-  de: DeConfig = defaultDe
   private nextPid = 1
   private nextZ = 1
   private listeners = new Map<string, Set<(payload: never) => void>>()
   private saveTimer: ReturnType<typeof setTimeout> | undefined
 
-  /** Restores the disk image and DE config, or writes the seed on first boot. */
+  /** Restores the disk image from storage, or writes the seed on first boot. */
   boot(): void {
     const saved = this.load()
     if (saved) this.root = saved
     else this.persist()
-    this.reloadDe()
     for (const p of this.processes) {
       if (p.state === 'focused') p.state = 'running'
     }
@@ -122,35 +88,6 @@ class Kernel {
   private changed(path: string): void {
     this.persist()
     this.emit('fs:change', { path })
-    if (path === DE_PATH) this.reloadDe()
-  }
-
-  // --- DE config ----------------------------------------------------------
-
-  reloadDe(): void {
-    let config = defaultDe
-    let raw: string | undefined
-    try {
-      raw = this.read(DE_PATH)
-      config = { ...defaultDe, ...(JSON.parse(raw) as Partial<DeConfig>) }
-      config.theme = { ...defaultDe.theme, ...config.theme }
-      config.window = { ...defaultDe.window, ...config.window }
-    } catch {
-      // No config yet, or the user broke the JSON. Fall back to the built-in
-      // DE; if the file is simply missing, write it so it can be edited.
-      if (!fs.exists(this.root, DE_PATH)) {
-        fs.writeFile(this.root, DE_PATH, JSON.stringify(defaultDe, null, 2))
-        this.persist()
-      }
-    }
-    this.de = config
-    this.emit('de:change', { source: 'file' })
-  }
-
-  /** Persists a DE change made through a UI (settings app) back to de.json. */
-  setDe(patch: Partial<DeConfig>): void {
-    const next: DeConfig = { ...this.de, ...patch, theme: { ...this.de.theme, ...patch.theme } }
-    this.write(DE_PATH, JSON.stringify(next, null, 2))
   }
 
   // --- process table ------------------------------------------------------
@@ -230,7 +167,6 @@ class Kernel {
     this.root = seedTree()
     this.processes = []
     this.persist()
-    this.reloadDe()
     this.emit('fs:change', { path: '/' })
   }
 }

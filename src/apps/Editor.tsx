@@ -1,5 +1,4 @@
-// Editor: plain text over the VFS. Saving /system/de.json re-themes the whole
-// desktop, which is the intended way to customise it.
+// Editor: plain text over the VFS.
 
 import { useState } from 'react'
 import { kernel } from '../kernel/kernel.ts'

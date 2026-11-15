@@ -77,22 +77,21 @@ const notes = `<!doctype html>
 
 const readme = `# OpenOS
 
-A web desktop you build by source. Nothing here is a product; it is a frame.
+A web desktop where nothing helps you customise it except its source.
 
-- \`/system/de.json\` — the desktop environment: shell, theme, wallpaper, dock.
 - \`/apps/*.html\` — programs. Open one and it runs in its own sandboxed frame.
   A program may load \`/apps/x.css\` and \`/apps/x.js\` from the VFS.
 - \`/home\` — your files.
 
-Edit the JSON, reload the shell, and the desktop changes. Rewrite a shell in
-\`src/de\` and the desktop becomes something else.
+The desktop you are looking at is \`src/os/Desktop.tsx\`. The kernel is
+\`src/kernel/\`. Edit either; there is no registry, no plugin API and no
+settings screen in between.
 `
 
 export function seedTree(): DirNode {
   const root = dir('/')
   mkdirp(root, '/apps')
   mkdirp(root, '/home')
-  mkdirp(root, '/system/themes')
 
   writeFile(root, '/apps/hello.html', hello)
   writeFile(root, '/apps/hello.css', helloCss)

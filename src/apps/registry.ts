@@ -1,5 +1,7 @@
 // Native apps plus everything in /apps that ends in .html. The dock is built
-// from this list, so dropping a program into /apps adds a dock icon.
+// from this list, so dropping a program into /apps adds a dock icon. Reorder
+// it, delete entries, add your own React app and render it in Desktop.tsx —
+// this list is just data the desktop happens to use.
 
 import { kernel } from '../kernel/kernel.ts'
 import { useFsVersion } from '../os/hooks.ts'
@@ -14,7 +16,6 @@ export interface AppEntry {
 const NATIVE: Omit<AppEntry, 'spawn'>[] = [
   { id: 'files', title: 'Files', icon: '▤' },
   { id: 'editor', title: 'Editor', icon: '✎' },
-  { id: 'settings', title: 'Settings', icon: '⚙' },
 ]
 
 export function useApps(): AppEntry[] {

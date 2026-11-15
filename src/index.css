@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
-/* The DE sets these from /system/de.json; these are the fallbacks. */
+/* Fallbacks. The desktop in src/os/theme.ts hard-codes its own values; this
+   file only styles the document itself and native apps that do not set them. */
 :root {
   --os-bg: #0b0d12;
   --os-surface: #141821;

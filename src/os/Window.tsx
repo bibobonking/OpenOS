@@ -1,22 +1,22 @@
 // Window chrome: drag by the title bar, resize from the corner, z-order from
-// the kernel's process table. No window library.
+// the kernel's process table. No window library, no theming hook — the caller
+// passes what it wants, and `theme` in Desktop.tsx is where taste lives.
 
 import { useRef } from 'react'
 import type { Process } from '../kernel/types.ts'
 import { kernel } from '../kernel/kernel.ts'
+import { theme } from './theme.ts'
 
 interface Props {
   proc: Process
   radius: number
-  blur: boolean
-  border: boolean
   children: React.ReactNode
 }
 
 const MIN_W = 280
 const MIN_H = 180
 
-export function Window({ proc, radius, blur, border, children }: Props) {
+export function Window({ proc, radius, children }: Props) {
   const drag = useRef<{ dx: number; dy: number } | null>(null)
 
   const startDrag = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -74,13 +74,13 @@ export function Window({ proc, radius, blur, border, children }: Props) {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        background: 'var(--os-surface)',
-        color: 'var(--os-text)',
-        border: border ? '1px solid rgba(255,255,255,.08)' : 'none',
+        background: theme.surface,
+        color: theme.text,
+        border: '1px solid rgba(255,255,255,.08)',
         boxShadow: focused
           ? '0 24px 60px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.06)'
           : '0 12px 30px -14px rgba(0,0,0,.6)',
-        backdropFilter: blur ? 'blur(16px)' : undefined,
+        backdropFilter: 'blur(16px)',
         opacity: proc.state === 'minimized' ? 0 : 1,
         pointerEvents: proc.state === 'minimized' ? 'none' : 'auto',
       }}
@@ -97,7 +97,7 @@ export function Window({ proc, radius, blur, border, children }: Props) {
           alignItems: 'center',
           gap: 8,
           padding: '0 8px 0 12px',
-          background: 'var(--os-surface-2)',
+          background: theme.surface2,
           borderBottom: '1px solid rgba(255,255,255,.06)',
           cursor: 'grab',
           userSelect: 'none',
@@ -112,7 +112,7 @@ export function Window({ proc, radius, blur, border, children }: Props) {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            color: focused ? 'var(--os-text)' : 'var(--os-muted)',
+            color: focused ? theme.text : theme.muted,
           }}
         >
           {proc.title}
@@ -127,15 +127,13 @@ export function Window({ proc, radius, blur, border, children }: Props) {
         <button
           onClick={() => kernel.exit(proc.pid)}
           aria-label={`Close ${proc.title}`}
-          style={{ ...btn, color: 'var(--os-danger)' }}
+          style={{ ...btn, color: theme.danger }}
         >
           ×
         </button>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, position: 'relative', background: 'var(--os-bg)' }}>
-        {children}
-      </div>
+      <div style={{ flex: 1, minHeight: 0, position: 'relative', background: theme.bg }}>{children}</div>
 
       <div
         onPointerDown={startResize}
@@ -162,7 +160,7 @@ const btn: React.CSSProperties = {
   border: 0,
   borderRadius: 6,
   background: 'transparent',
-  color: 'var(--os-muted)',
+  color: theme.muted,
   cursor: 'pointer',
   fontSize: 15,
   lineHeight: 1,

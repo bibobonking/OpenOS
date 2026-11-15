@@ -41,5 +41,4 @@ export interface KernelEventMap {
   'proc:spawn': Process
   'proc:exit': { pid: number }
   'proc:update': Process
-  'de:change': { source: 'file' | 'user' }
 }
